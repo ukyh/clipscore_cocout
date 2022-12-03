@@ -1,17 +1,30 @@
 # What's in here?
 
-This repo contains the code for our EMNLP 2021 paper: [CLIPScore: A
+The code for `CLIPScore`/`RefCLIPScore` evaluation of our paper, **[Switching to Discriminative Image Captioning by Relieving a Bottleneck of Reinforcement Learning](https://github.com/ukyh/switch_disc_caption.git)** (WACV 2023).
+
+### Acknowledgment
+The code is based on [clipscore](https://github.com/jmhessel/clipscore).
+We thank the authors of the repository.
+
+<!-- This repo contains the code for our EMNLP 2021 paper: [CLIPScore: A
 Reference-free Evaluation Metric for Image
 Captioning](https://arxiv.org/abs/2104.08718). CLIPScore is a metric
 that you can use to evaluate the quality of an automatic image
 captioning system.  In our paper, we show that CLIPScore achieves high
 correlation with human judgment on literal image captioning
 tasks. However, unlike BLEU or CIDEr, CLIPScore doesn't require
-reference captions.
+reference captions. -->
 
 If you find the paper or this code useful, please consider citing:
 
 ```
+@inproceedings{honda2023switch,
+  title={Switching to Discriminative Image Captioning by Relieving a Bottleneck of Reinforcement Learning},
+  author={Honda, Ukyo and Taro, Watanabe and Yuji, Matsumoto},
+  booktitle={Proceedings of the IEEE/CVF Winter Conference on Applications of Computer Vision (WACV)},
+  year={2023}
+}
+
 @inproceedings{hessel2021clipscore,
   title={{CLIPScore:} A Reference-free Evaluation Metric for Image Captioning},
   author={Hessel, Jack and Holtzman, Ari and Forbes, Maxwell and Bras, Ronan Le and Choi, Yejin},
@@ -22,7 +35,34 @@ If you find the paper or this code useful, please consider citing:
 
 # How do I run the code?
 
-## Command Line
+## Setup
+
+```bash
+git clone https://github.com/ukyh/clipscore_cocout.git
+cd clipscore_cocout
+conda create --name clipscore python=3.6
+conda activate clipscore
+
+pip install git+https://github.com/jmhessel/pycocoevalcap.git
+pip install git+https://github.com/openai/CLIP.git
+pip install -U scikit-learn
+pip install packaging
+```
+
+## Run
+
+Copy the output files to evaluate from [switch_disc_caption](https://github.com/ukyh/switch_disc_caption) (the files under `eval_results`).  
+Then, run the following commands.
+
+```bash
+cd clipscore_cocout
+conda activate clipscore
+
+python -u coco_eval/preproc_caps.py --input eval_results/sample_test.json
+python -u coco_eval/coco_eval.py --trg coco_caps/sample_test.json
+```
+
+<!-- ## Command Line
 
 Example usage
 ```
@@ -43,10 +83,9 @@ BLEU-3: 0.3469
 BLEU-4: 0.0000
 METEOR: 0.3444
 ROUGE: 0.4280
-CIDER: 0.5637
-SPICE: 0.4000
+CIDER: 0.4000
 CLIPScore: 0.8584
-RefCLIPScore: 0.8450
+RefCLIPScore: 0.8452
 ```
 
 Worse captions should get lower scores:
@@ -59,8 +98,7 @@ BLEU-3: 0.1359
 BLEU-4: 0.0000
 METEOR: 0.1861
 ROUGE: 0.3121
-CIDER: 0.2790
-SPICE: 0.1500
+CIDER: 0.1500
 CLIPScore: 0.7153
 RefCLIPScore: 0.7253
 ```
@@ -140,6 +178,22 @@ CLIPScore: 0.528
 RefCLIPScore: 0.605
 ```
 
+## Human evaluation
+```bash
+cd ${HOME}
+mkdir -p mscoco/all_images
+wget http://images.cocodataset.org/zips/val2014.zip
+unzip -j val2014.zip -d mscoco/all_images
+
+## Run stats_human_cands.py in disc_caption
+cd clipscore
+mkdir human_cands
+cp ${HOME}/disc_caption/processed_human_caps/human_cap_cands_test.json human_cands
+cp ${HOME}/disc_caption/processed_human_caps/human_cap_refs_test.json human_cands
+
+python -u clipscore.py human_cands/human_cap_cands_test.json ${HOME}/mscoco/all_images --references_json human_cands/human_cap_refs_test.json --save_per_instance oor_results/human_cands.json
+``` -->
+
 ## Reproducibility notes:
 
 - CLIPScore can run either on CPU or GPU. But, there are slight
@@ -168,8 +222,8 @@ RefCLIPScore: 0.605
   prompts will result in slightly different results, and we don't
   recommend them for the sake of reproducibility.
   
-  ## Acknowledgment
+  <!-- ## Acknowledgment
   
   The authors would like to thank Jungo Kasai for being the first to use
   this repo. Thanks to Jungo, we fixed a few issues, and added some
-  information about reproducibility that was missing before.
+  information about reproducibility that was missing before. -->

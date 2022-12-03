@@ -206,20 +206,30 @@ def get_refonlyclipscore(model, references, candidates, device):
 def main():
     args = parse_args()
 
-    image_paths = [os.path.join(args.image_dir, path) for path in os.listdir(args.image_dir)
-                   if path.endswith(('.png', '.jpg', '.jpeg', '.tiff'))]
-    image_ids = [pathlib.Path(path).stem for path in image_paths]
+    # image_paths = [os.path.join(args.image_dir, path) for path in os.listdir(args.image_dir)
+    #                if path.endswith(('.png', '.jpg', '.jpeg', '.tiff'))]
+    # image_ids = [pathlib.Path(path).stem for path in image_paths]
 
     with open(args.candidates_json) as f:
         candidates = json.load(f)
-    candidates = [candidates[cid] for cid in image_ids]
+
+    image_paths = [os.path.join(args.image_dir, path) for path in os.listdir(args.image_dir)
+                   if path.endswith(('.png', '.jpg', '.jpeg', '.tiff')) and pathlib.Path(path).stem in candidates]
+    image_ids = [pathlib.Path(path).stem for path in image_paths if pathlib.Path(path).stem in candidates]
+
+    # candidates = [candidates[cid] for cid in image_ids]
+    candidates = [candidates[cid] for cid in image_ids if cid in candidates]
 
     if args.references_json:
         with open(args.references_json) as f:
             references = json.load(f)
-            references = [references[cid] for cid in image_ids]
+            # references = [references[cid] for cid in image_ids]
+            references = [references[cid] for cid in image_ids if cid in references]
             if isinstance(references[0], str):
                 references = [[r] for r in references]
+            assert len(candidates) == len(references)
+    
+    print("Evaluate {} images".format(len(candidates)))
 
     device = "cuda" if torch.cuda.is_available() else "cpu"
     if device == 'cpu':
